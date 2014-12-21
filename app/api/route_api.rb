@@ -38,7 +38,7 @@ module RouteAPI
       put ':id' do
         authenticate!
         current_route = current_device.routes.find(params[:id])
-        error! 'Route already finalized!', 500 if current_route.finalized?
+        error! 'Route already finalized!', 410 if current_route.finalized?
 
         current_route.route += params[:points].map &:values
         current_route.save!
@@ -52,7 +52,7 @@ module RouteAPI
       put ':id/finalize' do
         authenticate!
         current_route = current_device.routes.find(params[:id])
-        error! 'Route already finalized!', 500 if current_route.finalized?
+        error! 'Route already finalized!', 410 if current_route.finalized?
 
         current_route.end_at = params[:end_at]
         current_route.finalized = true
