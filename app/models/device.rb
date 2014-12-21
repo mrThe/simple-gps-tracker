@@ -1,7 +1,6 @@
 class Device
-  include MongoMapper::Document
+  include Mongoid::Document
 
-  key :name, String
-  key :api_key, String
-
+  field :name, type: String
+  field :api_key, type: String
 end

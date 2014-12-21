@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   resources :devices
 
   root 'devices#index'
+  mount RouteAPI::API => '/api'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

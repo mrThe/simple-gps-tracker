@@ -10,8 +10,10 @@ gem 'turbolinks'
 
 gem 'slim-rails'
 
-gem 'bson_ext'
-gem 'mongo_mapper'
+gem 'mongoid', '~> 4.0.0'
+gem 'mongoid_geospatial'
+
+gem 'grape'
 
 group :development, :test do
   # gem 'spring'
@@ -23,5 +25,6 @@ group :development, :test do
   gem 'pry'
   gem 'pry-rails'
   gem 'pry-stack_explorer'
+  gem 'grape-rails-routes'
   # gem 'pry-debugger'
 end
