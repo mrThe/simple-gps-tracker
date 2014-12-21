@@ -8,6 +8,8 @@ gem 'coffee-rails', '~> 4.0.0'
 gem 'jquery-rails'
 gem 'turbolinks'
 
+gem 'slim-rails'
+
 gem 'bson_ext'
 gem 'mongo_mapper'
 
