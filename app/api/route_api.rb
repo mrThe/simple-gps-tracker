@@ -5,45 +5,58 @@ module RouteAPI
     format :json
 
     helpers do
-      # TODO: rewrite
       def current_device
-        @current_user ||= User.authorize!(env)
+        @current_device ||= Device.find_by api_key: params[:token] rescue nil
       end
 
       def authenticate!
-        error!('401 Unauthorized', 401) unless current_user
+        error!('401 Unauthorized', 401) unless current_device
       end
     end
 
     resource :routes do
-      desc "Test."
-      get :test do
-        { test: true }
-      end
-
       desc "Create a route."
-      # params do
-      #   requires :id, type: String, desc: "Device ID."
-      # end
+      params do
+        requires :start_at, type: Time, desc: "Start time."
+      end
       post do
         authenticate!
-        Status.create!({
-          user: current_user,
-          text: params[:status]
-        })
+        Route.create!({
+          device: current_device,
+          start_at: params[:start_at]
+        }).as_json(only: :id)
       end
 
-      desc "Update a status."
+      desc "Add bunch of points to the route."
       params do
-        requires :id, type: String, desc: "Status ID."
-        requires :status, type: String, desc: "Your status."
+        requires :id, type: String, desc: "Route ID."
+        requires :points, type: Array, desc: "New bunch of points." do
+          requires :lat, type: Float
+          requires :lng, type: Float
+        end
       end
       put ':id' do
         authenticate!
-        current_user.statuses.find(params[:id]).update({
-          user: current_user,
-          text: params[:status]
-        })
+        current_route = current_device.routes.find(params[:id])
+        error! 'Route already finalized!', 500 if current_route.finalized?
+
+        current_route.route += params[:points].map &:values
+        current_route.save!
+      end
+
+      desc "Finalize route."
+      params do
+        requires :id, type: String, desc: "Route ID."
+        requires :end_at, type: Time, desc: "End time."
+      end
+      put ':id/finalize' do
+        authenticate!
+        current_route = current_device.routes.find(params[:id])
+        error! 'Route already finalized!', 500 if current_route.finalized?
+
+        current_route.end_at = params[:end_at]
+        current_route.finalized = true
+        current_route.save!
       end
 
     end
