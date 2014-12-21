@@ -10,3 +10,5 @@ p
 = link_to 'Edit', edit_device_path(@device)
 '|
 = link_to 'Back', devices_path
+
+#map_canvas style=("width:100%; height:100%; position: absolute") data-id=@device._id data-lat=@map_center[0] data-lng=@map_center[1]

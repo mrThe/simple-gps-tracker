@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   root 'devices#index'
   mount RouteAPI::API => '/api'
+  mount JsAPI::API => '/client_api'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

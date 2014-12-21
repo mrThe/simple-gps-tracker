@@ -8,6 +8,7 @@ class DevicesController < ApplicationController
 
   # GET /devices/1
   def show
+    @map_center = @device.routes.last.route.center rescue [48.476639, 35.056490]
   end
 
   # GET /devices/new
