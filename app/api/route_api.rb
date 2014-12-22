@@ -40,8 +40,10 @@ module RouteAPI
         current_route = current_device.routes.find(params[:id])
         error! 'Route already finalized!', 410 if current_route.finalized?
 
-        current_route.route += params[:points].map &:values
-        current_route.save!
+        current_route.add_points! params[:points].map(&:values)
+        current_route.check_alerts(points)
+
+        current_route.as_json(only: :id)
       end
 
       desc "Finalize route."

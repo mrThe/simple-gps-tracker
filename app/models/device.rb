@@ -5,4 +5,5 @@ class Device
   field :api_key, type: String, default: proc { SecureRandom.hex(16) }
 
   has_many :routes
+  has_many :alerts
 end
