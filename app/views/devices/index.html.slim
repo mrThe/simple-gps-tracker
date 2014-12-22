@@ -1,4 +1,4 @@
-h1 Listing devices
+h1 Current devices
 
 table
   thead
@@ -7,14 +7,12 @@ table
       th Api key
       th
       th
-      th
 
   tbody
     - @devices.each do |device|
       tr
-        td = device.name
+        td = link_to device.name, device
         td = device.api_key
-        td = link_to 'Show', device
         td = link_to 'Edit', edit_device_path(device)
         td = link_to 'Destroy', device, data: {:confirm => 'Are you sure?'}, :method => :delete
 
