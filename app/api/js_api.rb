@@ -25,10 +25,10 @@ module JsAPI
 
       desc "Create an alert."
       params do
-        requires :name, type: String, desc: "Alert name"
-        requires :area, type: Array[Array], desc: "Polygon points"
+        requires :name,      type: String, desc: "Alert name"
+        requires :area,      type: Array[Array], desc: "Polygon points"
         requires :device_id, type: String, desc: "Device id."
-        requires :emails, type: Array, desc: "Emails array."
+        requires :emails,    type: Array, desc: "Emails array."
       end
       post do
         Alert.create!({

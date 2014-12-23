@@ -29,7 +29,7 @@ module RouteAPI
 
       desc "Add bunch of points to the route."
       params do
-        requires :id, type: String, desc: "Route ID."
+        requires :id,     type: String, desc: "Route ID."
         requires :points, type: Array, desc: "New bunch of points." do
           requires :lat, type: Float
           requires :lng, type: Float
@@ -49,7 +49,7 @@ module RouteAPI
 
       desc "Finalize route."
       params do
-        requires :id, type: String, desc: "Route ID."
+        requires :id,     type: String, desc: "Route ID."
         requires :end_at, type: Time, desc: "End time."
       end
       put ':id/finalize' do
