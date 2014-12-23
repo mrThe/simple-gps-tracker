@@ -14,3 +14,4 @@ Good to be implemented, but it not:
 - Make API with rabl or some other templating system
 - Make coffee code modular
 - Refactor HTML and CSS
+- Improve UI
