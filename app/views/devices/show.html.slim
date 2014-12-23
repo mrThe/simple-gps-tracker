@@ -12,12 +12,23 @@ p
 #wrapper
   #left
     h1 All alerts for all routes
+    | Filter by date:
+    #filters
+      form
+        label for="date-from"
+          | From
+        input name="date_from" id="date-from" type="date" step="1" required=true value=params[:date_from]
+        label for="date-to"
+          | To
+        input name="date_to" id="date-to" type="date" step="1" required=true value=params[:date_to]
+        input type="submit" value="Filter!"
     - @alert_notifications.each do |alert_notification|
       b = alert_notification.alert.name
       | - 
       i = alert_notification.alerted_at
       br
   #right
+    | Click on route for details
     #controls
       #control-buttons
         input id="alert-name" placeholder="Alert name" type="text"

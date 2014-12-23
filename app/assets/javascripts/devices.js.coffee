@@ -18,8 +18,8 @@ setInfoWindow = (object, latLng, content) ->
 
   infowindow
 
-drawRouteOnMap = (coordinates, map, alerts) ->
-  prepearedCoordinates = prepearCoordinates(coordinates)
+drawRouteOnMap = (route, map) ->
+  prepearedCoordinates = prepearCoordinates(route.route)
 
   path = new google.maps.Polyline(
     path: prepearedCoordinates
@@ -31,9 +31,9 @@ drawRouteOnMap = (coordinates, map, alerts) ->
 
   pathPoints = path.getPath().getArray()
   pathCenter = pathPoints[Math.floor(pathPoints.length/2)]
-  contentString = "<div id=\"content\">"
-  contentString += alerts.map (alert) ->
-    "<b>#{alert.alert.name}</b> | <i>#{alert.alerted_at}</i><br>"
+  contentString = "<div id=\"content\">Started at: #{route.start_at}<br>Ended at: #{route.end_at || '-'}<br><hr>"
+  contentString += route.alert_notifications.map (alert_notification) ->
+    "<b>#{alert_notification.alert.name}</b> | <i>#{alert_notification.alerted_at}</i><br>"
   contentString += "</div>"
 
   path.infoWindow = setInfoWindow(path, pathCenter, contentString)
@@ -120,7 +120,7 @@ requestRoutes = (deviceId, map) ->
     url: "/client_api/devices/#{deviceId}"
   ).done (data) ->
     for route in data
-      window.sharedVariables.routes.push drawRouteOnMap(route.route, map, route.alert_notifications)
+      window.sharedVariables.routes.push drawRouteOnMap(route, map)
 
 requestAlertAreas = (deviceId, map) ->
   window.sharedVariables.alerts = []

@@ -12,6 +12,16 @@ body, html, #map, #map_canvas, #wrapper, #right, #left {
     display: inline-block;
 
     border-right: 1px solid black;
+
+    #filters {
+      input {
+        margin: 5px;
+      }
+      label {
+        margin-right: 10px;
+        margin-left: 0px;
+      }
+    }
   }
 
   #right {

@@ -10,6 +10,10 @@ class DevicesController < ApplicationController
   def show
     @map_center = @device.routes.last.route.center rescue [48.476639, 35.056490]
     @alert_notifications = @device.alert_notifications
+    if params[:date_to] && params[:date_from]
+      @alert_notifications = @alert_notifications.where(:alerted_at.gt => params[:date_from],
+                                                        :alerted_at.lte => params[:date_to])
+    end
   end
 
   # GET /devices/new
