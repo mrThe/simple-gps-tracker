@@ -9,7 +9,16 @@ prepearCoordinates = (coordinates) ->
 
   prepearedCoordinates
 
-drawLineOnMap = (coordinates, map) ->
+setInfoWindow = (object, latLng, content) ->
+  infowindow = new google.maps.InfoWindow(content: content)
+  google.maps.event.addListener object, "click", ->
+    infowindow.setPosition latLng
+    infowindow.open object.getMap()
+    return
+
+  infowindow
+
+drawRouteOnMap = (coordinates, map, alerts) ->
   prepearedCoordinates = prepearCoordinates(coordinates)
 
   path = new google.maps.Polyline(
@@ -20,9 +29,20 @@ drawLineOnMap = (coordinates, map) ->
     strokeWeight: 3
   )
 
+  pathPoints = path.getPath().getArray()
+  pathCenter = pathPoints[Math.floor(pathPoints.length/2)]
+  contentString = "<div id=\"content\">"
+  contentString += alerts.map (alert) ->
+    "<b>#{alert.alert.name}</b> | <i>#{alert.alerted_at}</i><br>"
+  contentString += "</div>"
+
+  path.infoWindow = setInfoWindow(path, pathCenter, contentString)
+
   path.setMap map
 
-drawPolygonOnMap = (coordinates, map) ->
+  path
+
+drawAlertOnMap = (coordinates, map, alertName) ->
   prepearedCoordinates = prepearCoordinates(coordinates)
 
   polygon = new google.maps.Polygon(
@@ -33,11 +53,16 @@ drawPolygonOnMap = (coordinates, map) ->
     fillColor: "#ffff00"
     fillOpacity: 0.35
   )
+
+  contentString = "<div id=\"content\">#{alertName}</div>"
+  polygon.infoWindow = setInfoWindow(polygon, polygon.getBounds().getCenter(), contentString)
+
   polygon.setMap map
+
+  polygon
 
 initPolygonEditor = (map) ->
   drawingManager = new google.maps.drawing.DrawingManager(
-    drawingMode: google.maps.drawing.OverlayType.POLYGON
     drawingControl: true
     drawingControlOptions:
       position: google.maps.ControlPosition.TOP_CENTER
@@ -55,51 +80,82 @@ initPolygonEditor = (map) ->
   )
 
   google.maps.event.addListener drawingManager, "polygoncomplete", (polygon) ->
-    $("#save-area").show()
+    $("#control-buttons").show()
 
-    $("#save-area").unbind('click').on 'click', ->
+    $("#alert-save-btn").unbind('click').on 'click', ->
       coordinates = polygon.latLngs.getArray()[0].getArray()
       prepearedCoordinates = coordinates.map (coords) ->
-        # { lat: coords.lat(), lng: coords.lng() }
         [ coords.lat(), coords.lng() ]
 
-      console.log prepearedCoordinates
+      alertName = $("#alert-name").val()
+      if(alertName == "")
+        alert("Enter alert name!")
+        return
+
+      alertEmails = $("#alert-emails").val()
+      if(alertEmails == "")
+        alert("Enter alert emails!")
+        return
+
       $.post("/client_api/alerts",
         device_id: window.sharedVariables.deviceId
+        name:      alertName,
         area:      prepearedCoordinates,
-        emails:    ["qwe@asd.aasd", "zxc@zxc.zxc"]
-      ).done (data) ->
-        $("#save-area").hide()
+        emails:    alertEmails.split(',')
+      ).done((data) ->
+        $("#control-buttons").hide()
+        alert("Saved!")
+        return
+      ).fail ->
+        alert "Sometging going wrong, try to make zone without crossing lines"
         return
 
 
   drawingManager.setMap map
 
+requestRoutes = (deviceId, map) ->
+  window.sharedVariables.routes ||= []
+
+  $.ajax(
+    url: "/client_api/devices/#{deviceId}"
+  ).done (data) ->
+    for route in data
+      window.sharedVariables.routes.push drawRouteOnMap(route.route, map, route.alert_notifications)
+
+requestAlertAreas = (deviceId, map) ->
+  window.sharedVariables.alerts = []
+  $.ajax(
+    url: "/client_api/alerts/?device_id=#{deviceId}"
+  ).done (data) ->
+    for area in data
+      window.sharedVariables.alerts.push drawAlertOnMap(area.area, map, area.name)
+
+
 initialize = ->
+  return unless $('#map_canvas'); # return if no map canvas found
+
+  window.sharedVariables.deviceId = $('#map_canvas').data('id')
   mapOptions =
     center: new google.maps.LatLng($('#map_canvas').data('lat'), $('#map_canvas').data('lng'))
     zoom: 13
     mapTypeId: google.maps.MapTypeId.ROADMAP
 
   map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions)
-  window.sharedVariables.map = map;
 
-  polygon = initPolygonEditor(map)
-  window.sharedVariables.polygon = polygon;
+  polygonEditor = initPolygonEditor(map)
 
-  window.sharedVariables.deviceId = $('#map_canvas').data('id')
+  requestRoutes(window.sharedVariables.deviceId, map)
+  requestAlertAreas(window.sharedVariables.deviceId, map)
 
-  $.ajax(
-    url: "/client_api/devices/#{window.sharedVariables.deviceId}"
-  ).done (data) ->
-    for route in data
-      drawLineOnMap(route.route, window.sharedVariables.map)
-
-  $.ajax(
-    url: "/client_api/alerts/?device_id=#{window.sharedVariables.deviceId}"
-  ).done (data) ->
-    for area in data
-      drawPolygonOnMap(area.area, window.sharedVariables.map)
 
 $(document).ready ->
+
+  google.maps.Polygon::getBounds = ->
+    bounds = new google.maps.LatLngBounds()
+    @getPath().forEach (element, index) ->
+      bounds.extend element
+      return
+
+    bounds
+
   initialize()

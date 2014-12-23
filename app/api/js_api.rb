@@ -10,7 +10,7 @@ module JsAPI
         requires :id, type: String, desc: "Device id."
       end
       get ':id' do
-        Device.find(params[:id]).routes
+        Device.find(params[:id]).routes.as_json(include: {alert_notifications: { include: :alert }})
       end
     end
 
@@ -25,12 +25,14 @@ module JsAPI
 
       desc "Create an alert."
       params do
+        requires :name, type: String, desc: "Alert name"
         requires :area, type: Array[Array], desc: "Polygon points"
         requires :device_id, type: String, desc: "Device id."
         requires :emails, type: Array, desc: "Emails array."
       end
       post do
         Alert.create!({
+          name:      params[:name],
           area:      params[:area].map(&:second).map{|a| a.map &:to_f }, # Grape, WTF? Fuck it params parser.
           device_id: params[:device_id],
           emails:    params[:emails]

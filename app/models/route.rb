@@ -8,11 +8,12 @@ class Route
   field :end_at,    type: Time
   field :finalized, type: Boolean, default: false
 
-  index({route: '2dsphere'}, background: false)
+  index({route: '2dsphere'}, background: true)
 
-  validate :device_id, presence: true
+  validates :device_id, presence: true
 
   belongs_to :device
+  has_many :alert_notifications
 
   def add_points!(points)
     self.route += points
@@ -22,7 +23,9 @@ class Route
   end
 
   def check_alerts(points)
-    alerts = device.alerts.geo_spacial(:area.intersects_line => Route.last.route)
-    # TODO: log alerts
+    alerts = device.alerts.geo_spacial(:area.intersects_line => points)
+    alerts.each do |alert|
+      alert_notifications.create alert: alert, device: self.device, alerted_at: Time.now
+    end
   end
 end

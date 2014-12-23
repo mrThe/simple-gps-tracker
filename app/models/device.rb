@@ -6,4 +6,7 @@ class Device
 
   has_many :routes
   has_many :alerts
+  has_many :alert_notifications
+
+  validates :name, presence: true
 end

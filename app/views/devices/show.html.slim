@@ -11,10 +11,18 @@ p
 
 #wrapper
   #left
-    h1 Alerts
+    h1 All alerts for all routes
+    - @alert_notifications.each do |alert_notification|
+      b = alert_notification.alert.name
+      | - 
+      i = alert_notification.alerted_at
+      br
   #right
-    #control-buttons
-      input id="save-area" value="Save alert area" type="button" style="display: none;"
+    #controls
+      #control-buttons
+        input id="alert-name" placeholder="Alert name" type="text"
+        input id="alert-emails" placeholder="Alert emails, comma separated" type="text"
+        input id="alert-save-btn" value="Save alert area" type="button"
 
     #map
       #map_canvas data-id=@device._id data-lat=@map_center[0] data-lng=@map_center[1]
